@@ -88,11 +88,15 @@ export default function ResearchFormModal({
       if (!res.ok) throw new Error("Unable to save the research record.");
 
       await res.json();
-      onResearchAdded();
+      const refreshed = await onResearchAdded();
       onNotify?.({
-        type: "success",
-        title: isEdit ? "Record updated" : "Record added",
-        message: "The research repository has been updated.",
+        type: refreshed === false ? "error" : "success",
+        title: refreshed === false
+          ? (isEdit ? "Record updated; list could not refresh" : "Record added; list could not refresh")
+          : (isEdit ? "Record updated" : "Record added"),
+        message: refreshed === false
+          ? "The change was saved, but the repository could not reload. Refresh the page to see it."
+          : "The research repository has been updated.",
       });
       setPdfFile(null);
       onClose();

@@ -65,12 +65,14 @@ export default function ResearchList({
       if (!res.ok) throw new Error("Unable to delete the research record.");
 
       await res.json();
-      if (onResearchAdded) onResearchAdded();
+      const refreshed = onResearchAdded ? await onResearchAdded() : true;
       setDeleteId(null);
       onNotify?.({
-        type: "success",
-        title: "Record deleted",
-        message: "The research entry was removed successfully.",
+        type: refreshed === false ? "error" : "success",
+        title: refreshed === false ? "Record deleted; list could not refresh" : "Record deleted",
+        message: refreshed === false
+          ? "The record was removed, but the repository could not reload. Refresh the page to see the latest list."
+          : "The research entry was removed successfully.",
       });
 
       if (currentPageItems.length === 1 && currentPage > 1) {
@@ -240,7 +242,7 @@ export default function ResearchList({
 
               <button
                 type="button"
-                onClick={() => setSelectedAbstract(item.abstract)}
+                onClick={() => setSelectedAbstract(item)}
                 className="mt-3 block cursor-pointer text-left text-xs font-medium text-emerald-700 hover:underline"
               >
                 View abstract
@@ -362,8 +364,8 @@ export default function ResearchList({
       />
 
       <AbstractModal
-        isOpen={Boolean(selectedAbstract)}
-        abstract={selectedAbstract}
+        isOpen={selectedAbstract !== null}
+        abstract={selectedAbstract?.abstract ?? ""}
         onClose={() => setSelectedAbstract(null)}
       />
 

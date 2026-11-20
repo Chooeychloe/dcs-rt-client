@@ -32,7 +32,7 @@ export function ResearchRow({
 
       <td className="px-4 py-3">
         <button
-          onClick={() => onViewAbstract(item.abstract)}
+          onClick={() => onViewAbstract(item)}
           className="cursor-pointer text-xs text-slate-600 hover:text-emerald-700 text-left block max-w-xs group"
         >
           <span className="line-clamp-2 group-hover:underline">

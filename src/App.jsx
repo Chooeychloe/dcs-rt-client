@@ -31,9 +31,11 @@ export default function App() {
     try {
       const data = await loadResearch();
       setResearchLogs(data);
+      return true;
     } catch (err) {
       console.error("Database sync runtime failure:", err);
       showLoadError();
+      return false;
     }
   };
 

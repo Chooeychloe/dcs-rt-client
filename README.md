@@ -1,145 +1,73 @@
 # DCS Research Repository System
 
-A full-stack web application for managing research records (capstone/thesis/projects), including PDF uploads, status tracking, and search functionality.
-## Tech Stack
-### Frontend
-React (Vite or CRA)
-Tailwind CSS
-### Backend
-Node.js
-Express.js
-MySQL (mysql2)
-### Features
-Create / Read / Update / Delete (CRUD)
-PDF file upload
-Search filtering
-Status tracking (MOR / Part A / Part B / Finished)
-Abstract preview modal
-Delete confirmation modal
+A React and Express application for managing student research records, manuscript PDFs, status, and project links.
 
-## Project Structure
-```
-dcs-research-tracker/
-│
-├── research-client/    
-│   ├── src/
-│   └── package.json
-│
-├── research-server/       
-│   ├── uploads/            
-│   ├── server.js
-│   └── package.json
-│
-└── README.md
-```
-## Installation
+## Requirements
 
-### ⚙️ 1. Backend Setup (Node + Express)
+- Node.js 20 or newer
+- MySQL 8 or compatible
 
-📌 Install dependencies
-```bash
-cd research-server
-npm install
-```
-📌 Install required packages
-```bash
-npm install express cors mysql2 multer dotenv
-```
-📌 Create MySQL Database
+## Database setup
 
-```bash
-CREATE DATABASE dcs_research;
+Create the database and table before starting the API:
 
+```sql
+CREATE DATABASE dcs_research CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE dcs_research;
 
 CREATE TABLE research (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
+  type ENUM('Capstone', 'Thesis') NOT NULL DEFAULT 'Capstone',
   authors TEXT NOT NULL,
   abstract TEXT NOT NULL,
   pdf_url VARCHAR(500),
   adviser VARCHAR(255) NOT NULL,
   critic VARCHAR(255) NOT NULL,
-  status ENUM('MOR', 'Part A', 'Part B', 'Finished') DEFAULT 'MOR',
+  status ENUM('MOR', 'Part A', 'Part B', 'Finished') NOT NULL DEFAULT 'MOR',
   website_url VARCHAR(500),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
-📌 Configure Database Connection
 
-Edit server.js:
-```bash
-const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "YOUR_PASSWORD",
-  database: "dcs_research",
-});
-```
-📌 Run Backend
+If you already have the table from an earlier version, add its missing classification column:
 
-```bash
-node server.js
+```sql
+ALTER TABLE research
+  ADD COLUMN type ENUM('Capstone', 'Thesis') NOT NULL DEFAULT 'Capstone';
 ```
 
-🎯 2. Frontend Setup (React)
-📌 Install dependencies
+## Run locally
 
-```bash
-cd research-client
+In `dcs-rt-api`, install dependencies and configure the database environment variables:
+
+```powershell
+cd dcs-rt-api
 npm install
+$env:DB_HOST = 'localhost'
+$env:DB_USER = 'root'
+$env:DB_PASSWORD = 'your-password'
+$env:DB_NAME = 'dcs_research'
+$env:CLIENT_ORIGINS = 'http://localhost:5173'
+npm start
 ```
 
-📌 Run frontend
+In a second terminal, run the client:
 
-```bash
+```powershell
+cd dcs-rt-client
+npm install
+$env:VITE_API_URL = 'http://localhost:5000'
 npm run dev
 ```
 
-📤 3. File Upload System (IMPORTANT)
+The API listens on port `5000` by default. Set `PORT` to change it. Set `VITE_API_URL` for the client to use a different API base URL; the deployed API URL is used if it is not set.
 
-This project uses local uploads:
-```bash
-/uploads
-```
-🔌 4. Backend API Endpoints
-📌 Create Research
+For deployment, set `CLIENT_ORIGINS` on the API to a comma-separated list of exact client origins, including the production site origin. The API accepts PDFs up to 10 MB and stores them under `dcs-rt-api/uploads`; use persistent storage or object storage in production so uploads survive redeployments.
 
-```bash
-POST /api/research
-```
-📌 Get All Research
-```bash
-GET /api/research
-```
-📌 Update Research
-```bash
-PUT /api/research/:id
-```
-📌 Delete Research
-```bash
-DELETE /api/research/:id
-```
+## API routes
 
-🚀 Running the Full System
-Step 1: Start MySQL
-
-Make sure MySQL is running
-
-Step 2: Start backend
-
-```bash
-cd research-server
-node server.js
-```
-Step 3: Start frontend
-
-```bash
-cd research-client
-npm run dev
-```
-
-👨‍💻 Author: Edan A. Belgica
-
-Developed for DCS Research Repository System
-For academic use.
+- `GET /api/research` — list records
+- `POST /api/research` — create a record (multipart form; optional `pdf_file`)
+- `PUT /api/research/:id` — update a record (multipart form; optional replacement `pdf_file`)
+- `DELETE /api/research/:id` — delete a record
