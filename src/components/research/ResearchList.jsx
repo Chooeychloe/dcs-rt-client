@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { API_URL } from "../../config/constants";
 import { ResearchRow } from "./ResarchRow"; // Fixed typo 'ResarchRow'
-import { AbstractModal } from "./AbstractModal";
+import { SummaryModal } from "./SummaryModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { PdfViewerModal } from "./PdfViewerModal";
 import { HighlightedText } from "./HighlightedText";
+import { apiFetch } from "../../lib/api";
 
 const ITEMS_PER_PAGE = 5;
 const SEARCH_WEIGHTS = {
   title: 6,
   authors: 5,
   abstract: 4,
+  description: 4,
   adviser: 3,
   critic: 3,
   academic_year: 2,
@@ -30,6 +32,7 @@ function normalizeSearchText(value) {
 function relevanceScore(item, tokens) {
   return Object.entries(SEARCH_WEIGHTS).reduce((score, [field, weight]) => {
     if (field === "abstract" && item.status !== "Finished") return score;
+    if (field === "description" && item.status === "Finished") return score;
     const value = normalizeSearchText(item[field]);
     return score + tokens.reduce((fieldScore, token) =>
       fieldScore + (value.includes(token) ? weight : 0), 0);
@@ -40,6 +43,7 @@ export default function ResearchList({
   researchLogs,
   onResearchAdded,
   onEdit,
+  canDelete = false,
   onNotify,
 }) {
   const [activeTab, setActiveTab] = useState("All");
@@ -48,7 +52,7 @@ export default function ResearchList({
   const [academicYearFilter, setAcademicYearFilter] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedAbstract, setSelectedAbstract] = useState(null);
+  const [selectedSummary, setSelectedSummary] = useState(null);
   const [selectedManuscript, setSelectedManuscript] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -76,6 +80,7 @@ export default function ResearchList({
 
     const searchableText = normalizeSearchText(Object.keys(SEARCH_WEIGHTS)
       .filter((field) => field !== "abstract" || item.status === "Finished")
+      .filter((field) => field !== "description" || item.status !== "Finished")
       .map((field) => item[field])
       .join(" "));
     return searchTokens.every((token) => searchableText.includes(token));
@@ -105,7 +110,7 @@ export default function ResearchList({
     setIsDeleting(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/research/${deleteId}`, {
+      const res = await apiFetch(`${API_URL}/api/research/${deleteId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Unable to delete the research record.");
@@ -156,7 +161,7 @@ export default function ResearchList({
             <input
               type="search"
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 transition placeholder:text-slate-400 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/15"
-              placeholder="Search title, abstract, authors, adviser..."
+              placeholder="Search title, summary, authors, adviser..."
               value={searchQuery}
               onChange={handleSearchChange}
             />
@@ -221,7 +226,7 @@ export default function ResearchList({
           <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.08em] text-slate-600">
             <tr>
               <th className="px-4 py-3 text-left">Title</th>
-              <th className="px-4 py-3 text-left">Abstract</th>
+              <th className="px-4 py-3 text-left">Summary</th>
               <th className="px-4 py-3 text-left">Adviser / Critic</th>
               <th className="px-4 py-3 text-left">Status</th>
               <th className="px-4 py-3 text-left">Assets</th>
@@ -235,9 +240,10 @@ export default function ResearchList({
                   key={item.id}
                   item={item}
                   searchQuery={searchQuery}
+                  canDelete={canDelete}
                   onEdit={onEdit}
                   onDelete={setDeleteId}
-                  onViewAbstract={setSelectedAbstract}
+                  onViewSummary={setSelectedSummary}
                   onViewManuscript={(selectedItem) =>
                     setSelectedManuscript({
                       title: selectedItem.title,
@@ -310,13 +316,13 @@ export default function ResearchList({
                 </p>
               </div>
 
-              {item.status === "Finished" && item.abstract && (
+              {(item.status === "Finished" ? item.abstract : item.description) && (
                 <button
                   type="button"
-                  onClick={() => setSelectedAbstract(item)}
+                  onClick={() => setSelectedSummary(item)}
                   className="mt-3 block cursor-pointer text-left text-xs font-medium text-emerald-700 hover:underline"
                 >
-                  View abstract
+                  View summary
                 </button>
               )}
 
@@ -354,13 +360,13 @@ export default function ResearchList({
                     Edit
                   </button>
                 )}
-                <button
+                {canDelete && <button
                   type="button"
                   onClick={() => setDeleteId(item.id)}
                   className="cursor-pointer rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
                 >
                   Delete
-                </button>
+                </button>}
               </div>
             </div>
           ))
@@ -435,11 +441,11 @@ export default function ResearchList({
         isDeleting={isDeleting}
       />
 
-      <AbstractModal
-        isOpen={selectedAbstract !== null}
-        abstract={selectedAbstract?.abstract ?? ""}
+      <SummaryModal
+        isOpen={selectedSummary !== null}
+        summary={selectedSummary?.status === "Finished" ? selectedSummary.abstract : selectedSummary?.description}
         query={searchQuery}
-        onClose={() => setSelectedAbstract(null)}
+        onClose={() => setSelectedSummary(null)}
       />
 
       <PdfViewerModal

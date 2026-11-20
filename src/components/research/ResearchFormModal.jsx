@@ -4,6 +4,7 @@ import { Modal } from "../ui/Modal";
 import { Input } from "../ui/Input";
 import { TextArea } from "../ui/TextArea";
 import { Select } from "../ui/Select";
+import { apiFetch } from "../../lib/api";
 
 const TYPE_OPTIONS = [
   { value: "Capstone", label: "Capstone Project" },
@@ -38,6 +39,7 @@ export default function ResearchFormModal({
         type: editData.type || "Capstone",
         authors: editData.authors || "",
         abstract: editData.status === "Finished" ? (editData.abstract || "") : "",
+        description: editData.status === "Finished" ? "" : (editData.description || ""),
         adviser: editData.adviser || "",
         critic: editData.critic || "",
         status: editData.status || "Part A",
@@ -50,6 +52,7 @@ export default function ResearchFormModal({
       type: "Capstone",
       authors: "",
       abstract: "",
+      description: "",
       adviser: "",
       critic: "",
       status: "Part A",
@@ -63,11 +66,9 @@ export default function ResearchFormModal({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "status" && value !== "Finished" ? { abstract: "" } : {}),
-    }));
+    setFormData((prev) => name === "status"
+      ? { ...prev, status: value, abstract: "", description: "" }
+      : { ...prev, [name]: value });
   };
 
   const resetAndClose = () => {
@@ -90,7 +91,7 @@ export default function ResearchFormModal({
     const method = isEdit ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, { method, body: data });
+      const res = await apiFetch(url, { method, body: data });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(payload.error || "Unable to save the research record.");
@@ -144,11 +145,13 @@ export default function ResearchFormModal({
             <Select name="status" value={formData.status} onChange={handleChange} options={STATUS_OPTIONS} disabled={isSaving} required />
           </Field>
 
-          {formData.status === "Finished" && (
-            <Field label="Abstract" required className="md:col-span-2">
+          <Field label={formData.status === "Finished" ? "Abstract" : "Description"} required className="md:col-span-2">
+            {formData.status === "Finished" ? (
               <TextArea name="abstract" value={formData.abstract} onChange={handleChange} placeholder="Enter research abstract" rows="4" disabled={isSaving} required />
-            </Field>
-          )}
+            ) : (
+              <TextArea name="description" value={formData.description} onChange={handleChange} placeholder="Describe the research project and its current work" rows="4" disabled={isSaving} required />
+            )}
+          </Field>
 
           <Field label="Adviser" required>
             <Input name="adviser" value={formData.adviser} onChange={handleChange} placeholder="Enter adviser name" disabled={isSaving} required />

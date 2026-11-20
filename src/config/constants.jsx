@@ -16,6 +16,7 @@ export const EMPTY_FORM = {
   type: "Capstone",
   authors: "",
   abstract: "",
+  description: "",
   adviser: "",
   critic: "",
   academic_year: "",
