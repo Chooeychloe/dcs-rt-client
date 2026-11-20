@@ -1,6 +1,6 @@
 # DCS Research Repository System
 
-A React and Express application for managing student research records, manuscript PDFs, status, and project links.
+A React and Express application for managing student research records, manuscript PDFs, academic years, status, and project links. Abstracts are collected for finished research only. Search supports all-word matching across record fields, filters, relevance sorting, and highlighted title and abstract matches.
 
 ## Requirements
 
@@ -26,6 +26,7 @@ CREATE TABLE research (
   critic VARCHAR(255) NOT NULL,
   status ENUM('MOR', 'Part A', 'Part B', 'Finished') NOT NULL DEFAULT 'MOR',
   website_url VARCHAR(500),
+  academic_year VARCHAR(9),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -37,18 +38,22 @@ ALTER TABLE research
   ADD COLUMN type ENUM('Capstone', 'Thesis') NOT NULL DEFAULT 'Capstone';
 ```
 
+For an existing database, add the academic-year field as well:
+
+```sql
+ALTER TABLE research
+  ADD COLUMN academic_year VARCHAR(9) NULL AFTER website_url;
+```
+
 ## Run locally
 
-In `dcs-rt-api`, install dependencies and configure the database environment variables:
+In `dcs-rt-api`, copy `.env.example` to `.env` and set `DB_PASSWORD` to your actual MySQL password. `.env` is ignored by Git. Then install dependencies and start the API:
 
 ```powershell
 cd dcs-rt-api
+Copy-Item .env.example .env
+# Edit .env and set DB_PASSWORD before continuing.
 npm install
-$env:DB_HOST = 'localhost'
-$env:DB_USER = 'root'
-$env:DB_PASSWORD = 'your-password'
-$env:DB_NAME = 'dcs_research'
-$env:CLIENT_ORIGINS = 'http://localhost:5173'
 npm start
 ```
 

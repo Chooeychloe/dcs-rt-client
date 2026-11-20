@@ -1,5 +1,8 @@
+import { HighlightedText } from "./HighlightedText";
+
 export function ResearchRow({
   item,
+  searchQuery = "",
   onEdit,
   onDelete,
   onViewAbstract,
@@ -18,7 +21,7 @@ export function ResearchRow({
     <tr className="hover:bg-emerald-50/40 transition">
       <td className="px-4 py-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-bold text-slate-900">{item.title}</span>
+          <span className="font-bold text-slate-900"><HighlightedText text={item.title} query={searchQuery} /></span>
           <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded uppercase tracking-wider border ${
             item.type === "Thesis" 
               ? "bg-purple-50 text-purple-700 border-purple-200" 
@@ -28,18 +31,21 @@ export function ResearchRow({
           </span>
         </div>
         <div className="text-xs text-emerald-700 font-medium mt-0.5">{item.authors}</div>
+        <div className="mt-0.5 text-xs text-slate-500">AY {item.academic_year || "Not set"}</div>
       </td>
 
       <td className="px-4 py-3">
-        <button
-          onClick={() => onViewAbstract(item)}
-          className="cursor-pointer text-xs text-slate-600 hover:text-emerald-700 text-left block max-w-xs group"
-        >
-          <span className="line-clamp-2 group-hover:underline">
-            {item.abstract}
-          </span>
-          <span className="text-[10px] text-emerald-600 mt-1 block font-medium">Click to view full abstract</span>
-        </button>
+        {item.status === "Finished" && item.abstract ? (
+          <button
+            onClick={() => onViewAbstract(item)}
+            className="cursor-pointer text-xs text-slate-600 hover:text-emerald-700 text-left block max-w-xs group"
+          >
+            <span className="line-clamp-2 group-hover:underline">
+              <HighlightedText text={item.abstract} query={searchQuery} />
+            </span>
+            <span className="text-[10px] text-emerald-600 mt-1 block font-medium">Click to view full abstract</span>
+          </button>
+        ) : <span className="text-xs text-slate-400">Available when finished</span>}
       </td>
 
       <td className="px-4 py-3 text-xs space-y-1 text-slate-700">
