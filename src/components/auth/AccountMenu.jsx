@@ -28,6 +28,7 @@ export function AccountMenu({ currentUser, onOpenAdmin, onBack, onChangePassword
     setIsOpen(false);
     action?.();
   };
+  const displayName = currentUser?.name?.trim() || "admin";
 
   return (
     <div className="relative" ref={rootRef}>
@@ -39,7 +40,7 @@ export function AccountMenu({ currentUser, onOpenAdmin, onBack, onChangePassword
         onClick={() => setIsOpen((open) => !open)}
         className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
       >
-        <span>{currentUser.name}</span>
+        <span>{displayName}</span>
         <span className="text-xs font-normal text-slate-500">{currentUser.role}</span>
         <span aria-hidden="true" className="text-xs">{isOpen ? "▲" : "▼"}</span>
       </button>
