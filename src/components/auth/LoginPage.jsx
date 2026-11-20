@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { API_URL } from "../../config/constants";
+import { PasswordInput } from "./PasswordInput";
 
 export function LoginPage({ onAuthenticated }) {
   const [email, setEmail] = useState("");
@@ -42,7 +43,7 @@ export function LoginPage({ onAuthenticated }) {
           </label>
           <label className="block space-y-1.5">
             <span className="text-sm font-semibold text-slate-700">Password</span>
-            <input type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/15" />
+            <PasswordInput autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} className="rounded-md border border-slate-300 pl-3 pr-14 py-2.5 text-sm focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/15" />
           </label>
           {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
           <button type="submit" disabled={isSigningIn} className="w-full rounded-md bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60">{isSigningIn ? "Signing in..." : "Sign in"}</button>

@@ -3,6 +3,7 @@ import { API_URL } from "../../config/constants";
 import { apiFetch } from "../../lib/api";
 import { FeedbackPopup } from "../ui/FeedbackPopup";
 import { AccountMenu } from "../auth/AccountMenu";
+import { PasswordInput } from "../auth/PasswordInput";
 
 export function AdminPanel({ currentUser, onBack, onChangePassword, onLogout, onNotify, feedback, onCloseFeedback }) {
   const [users, setUsers] = useState([]);
@@ -94,7 +95,6 @@ export function AdminPanel({ currentUser, onBack, onChangePassword, onLogout, on
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-emerald-700">Signed in as {currentUser.email}</p>
             <h1 className="text-2xl font-bold text-slate-900">User roles and change history</h1>
           </div>
           <AccountMenu currentUser={currentUser} adminPage onBack={onBack} onChangePassword={onChangePassword} onSignOut={onLogout} />
@@ -111,7 +111,7 @@ export function AdminPanel({ currentUser, onBack, onChangePassword, onLogout, on
             <input aria-label="Name" placeholder="Name" required maxLength={255} value={newUser.name} onChange={(event) => setNewUser((user) => ({ ...user, name: event.target.value }))} className="rounded border border-slate-300 px-3 py-2 text-sm" />
             <input aria-label="Email" type="email" placeholder="Email" required maxLength={255} value={newUser.email} onChange={(event) => setNewUser((user) => ({ ...user, email: event.target.value }))} className="rounded border border-slate-300 px-3 py-2 text-sm" />
             <select aria-label="Role" value={newUser.role} onChange={(event) => setNewUser((user) => ({ ...user, role: event.target.value }))} className="rounded border border-slate-300 bg-white px-3 py-2 text-sm"><option value="viewer">Viewer</option><option value="editor">Editor</option><option value="admin">Admin</option></select>
-            <input aria-label="Initial password" type="password" autoComplete="new-password" placeholder="Initial password (12+ chars)" minLength={12} maxLength={256} required value={newUser.password} onChange={(event) => setNewUser((user) => ({ ...user, password: event.target.value }))} className="rounded border border-slate-300 px-3 py-2 text-sm" />
+            <PasswordInput aria-label="Initial password" autoComplete="new-password" placeholder="Initial password (12+ chars)" minLength={12} maxLength={256} required value={newUser.password} onChange={(event) => setNewUser((user) => ({ ...user, password: event.target.value }))} className="rounded border border-slate-300 pl-3 pr-14 py-2 text-sm" />
             <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Create account</button>
           </form>
           {isLoading ? <p className="p-6 text-sm text-slate-500">Loading users...</p> : (
@@ -127,7 +127,7 @@ export function AdminPanel({ currentUser, onBack, onChangePassword, onLogout, on
                       <td className="px-4 py-3"><select value={user.role} disabled={user.id === currentUser.id} onChange={(event) => updateDraft(user.id, { role: event.target.value })} className="rounded border border-slate-300 bg-white px-2 py-1.5 capitalize disabled:opacity-60"><option value="viewer">Viewer</option><option value="editor">Editor</option><option value="admin">Admin</option></select></td>
                       <td className="px-4 py-3"><label className="inline-flex items-center gap-2"><input type="checkbox" checked={Boolean(user.is_active)} disabled={user.id === currentUser.id} onChange={(event) => updateDraft(user.id, { is_active: event.target.checked })} /><span>{user.is_active ? "Active" : "Inactive"}</span></label></td>
                       <td className="whitespace-nowrap px-4 py-3 text-slate-600">{user.last_login_at ? new Date(user.last_login_at).toLocaleString() : "Never"}</td>
-                      <td className="min-w-64 px-4 py-3"><div className="flex flex-col gap-2"><input aria-label={`Reset password for ${user.email}`} type="password" autoComplete="new-password" placeholder="Reset password (optional)" minLength={12} maxLength={256} value={user.passwordDraft || ""} onChange={(event) => updateDraft(user.id, { passwordDraft: event.target.value })} className="rounded border border-slate-300 px-2 py-1.5 text-xs" /><button type="button" disabled={savingId === user.id} onClick={() => saveUser(user)} className="self-start rounded bg-emerald-700 px-3 py-1.5 font-medium text-white hover:bg-emerald-800 disabled:opacity-50">{savingId === user.id ? "Saving..." : "Save access"}</button></div></td>
+                      <td className="min-w-64 px-4 py-3"><div className="flex flex-col gap-2"><PasswordInput aria-label={`Reset password for ${user.email}`} autoComplete="new-password" placeholder="Reset password (optional)" minLength={12} maxLength={256} value={user.passwordDraft || ""} onChange={(event) => updateDraft(user.id, { passwordDraft: event.target.value })} className="rounded border border-slate-300 pl-2 pr-14 py-1.5 text-xs" /><button type="button" disabled={savingId === user.id} onClick={() => saveUser(user)} className="self-start rounded bg-emerald-700 px-3 py-1.5 font-medium text-white hover:bg-emerald-800 disabled:opacity-50">{savingId === user.id ? "Saving..." : "Save access"}</button></div></td>
                     </tr>
                   ))}
                   {!users.length && !isLoading && <tr><td colSpan="5" className="px-4 py-8 text-center text-slate-500">No users found.</td></tr>}
