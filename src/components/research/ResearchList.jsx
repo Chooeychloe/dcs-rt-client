@@ -56,6 +56,7 @@ export default function ResearchList({
   const [selectedManuscript, setSelectedManuscript] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const hasActions = Boolean(onEdit || canDelete);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -230,7 +231,7 @@ export default function ResearchList({
               <th className="px-4 py-3 text-left">Adviser / Critic</th>
               <th className="px-4 py-3 text-left">Status</th>
               <th className="px-4 py-3 text-left">Assets</th>
-              <th className="px-4 py-3 text-left">Actions</th>
+              {hasActions && <th className="px-4 py-3 text-left">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
@@ -241,6 +242,7 @@ export default function ResearchList({
                   item={item}
                   searchQuery={searchQuery}
                   canDelete={canDelete}
+                  showActions={hasActions}
                   onEdit={onEdit}
                   onDelete={setDeleteId}
                   onViewSummary={setSelectedSummary}
@@ -254,7 +256,7 @@ export default function ResearchList({
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="px-4 py-12 text-center">
+                <td colSpan={hasActions ? 6 : 5} className="px-4 py-12 text-center">
                   <div className="mx-auto flex max-w-sm flex-col items-center">
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
                       0
