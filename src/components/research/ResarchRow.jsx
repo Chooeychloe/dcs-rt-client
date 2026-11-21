@@ -5,6 +5,7 @@ export function ResearchRow({
   searchQuery = "",
   onEdit,
   canDelete = false,
+  showActions = false,
   onDelete,
   onViewSummary,
   onViewManuscript,
@@ -78,7 +79,7 @@ export function ResearchRow({
         )}
       </td>
 
-      <td className="px-4 py-3 text-xs">
+      {showActions && <td className="px-4 py-3 text-xs">
         <div className="flex gap-1.5">
           {onEdit && (
             <button onClick={() => onEdit(item)} className="cursor-pointer bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1 rounded transition">
@@ -89,7 +90,7 @@ export function ResearchRow({
             Delete
           </button>}
         </div>
-      </td>
+      </td>}
     </tr>
   );
 }
